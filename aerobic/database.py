@@ -1,7 +1,6 @@
 from . import db
-from flask_login import UserMixin
 
-class Athlete(UserMixin, db.Model):
+class Athlete(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     access_token = db.Column(db.String(128), nullable=False, unique=True)
     name = db.Column(db.String(128), nullable=False)
@@ -22,8 +21,8 @@ class Activity(db.Model):
     moving_time = db.Column(db.Interval)                  # 2 in seconds
     total_elevation_gain = db.Column(db.Integer)          # 3 in meters
     type = db.Column(db.String)                           # 4 i.e. Run, Bike, Swim
-    start_date = db.Column(db.Date)                   # 5 time string in GMT (i.e. 2012-12-13T03:43:19Z)
-    start_date_local = db.Column(db.String)             # 6 time string in activity timezone
+    start_date = db.Column(db.Date)                       # 5 time string in GMT (i.e. 2012-12-13T03:43:19Z)
+    start_date_local = db.Column(db.Date)                 # 6 time string in activity timezone
     average_speed = db.Column(db.Float)                   # 7 in meters per second
     average_heartrate = db.Column(db.Float)               # 8 average over moving portion
     aerobic_value = db.Column(db.Float)                   # 9 this is average_speed/average_heartrate

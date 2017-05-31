@@ -1,20 +1,23 @@
-# Follows the Reddit Oauth2 example at https://github.com/reddit/reddit/wiki/OAuth2-Python-Example
-# and translates to Strava
-
-# Strava Oauth2 application credentials. These need to move to Heroku-based config and away from application
-
-import datetime
-
-# Import tools for visualization endpoint
-import matplotlib.pyplot as plt
-from flask import request, make_response
-from stravalib import Client
-
-from env.config import oauth_credentials
 from . import app, db
 from .database import Activity, Athlete
 
-client = Client()
+##############################################################
+# Tools for Strava Oauth2 authentication and API interaction #
+##############################################################
+from stravalib import Client
+from flask import request
+import datetime
+from env.config import oauth_credentials
+
+###########################
+# Tools for visualization #
+###########################
+import matplotlib.pyplot as plt
+from flask import make_response
+from io import BytesIO
+
+
+client = Client() # stravalib object--documentation available at http://pythonhosted.org/stravalib/
 
 @app.route('/')
 # Consider using uuid4 to generate random string for optional state parameter that can be saved
@@ -37,24 +40,24 @@ def homepage():
            "</center>".format(authorization_url)
 
 
-@app.route("/exchange")
+@app.route("/redirect")
 def access_token_and_database():
     """Check user authorization, get temporary authorization code, exchange code for token,
     and manage database."""
+
     # If user authorizes, "code" will be included in query string
-    # If user denies, "error=access_denied" will be included in query string
+    # If user denies, error message "access_denied" will be included in query string
 
     error = request.args.get('error', '')
     if error:
         return "Error: " + error
     code = request.args.get("code")
-    client = Client()
     access_token = client.exchange_code_for_token(client_id=oauth_credentials["CLIENT_ID"],
                                                   client_secret=oauth_credentials["CLIENT_SECRET"],
                                                   code=code)
     authenticated_athlete = Client(access_token=access_token)
 
-    # Get authenticated athlete firstname (http://strava.github.io/api/v3/athlete/),
+    # Get authenticated athlete firstname (http://strava.github.io/api/v3/athlete/).
     name = authenticated_athlete.get_athlete().firstname
 
     # Check whether authenticated_athlete already exists in database. If true, delete activities.
@@ -67,14 +70,14 @@ def access_token_and_database():
         db.session.commit()
     else:
         athlete_in_database = Athlete(access_token=access_token,
-                             name=name,
-                             activities=[])
+                                      name=name,
+                                      activities=[])
         db.session.add(athlete_in_database)
         db.session.commit()
 
-    #####################################################################
-    # Get authenticated athlete list of activities and store to database#
-    #####################################################################
+    ######################################################################
+    # Get authenticated athlete list of activities and store to database #
+    ######################################################################
 
     # Define variable for the last year of activities
     one_year_ago = datetime.datetime.utcnow() - datetime.timedelta(days=365)
@@ -83,7 +86,7 @@ def access_token_and_database():
     for activity in activities:
         if activity.has_heartrate and activity.average_speed.num > 0:
             value = (activity.average_speed / activity.average_heartrate)
-            # Stravalib is returning Activity classes that work with units
+            # Stravalib is returning Activity classes that work with units, requiring ".num" for some
             entry = Activity(distance = activity.distance.num,
                              moving_time = activity.moving_time,
                              total_elevation_gain = activity.total_elevation_gain.num,
@@ -99,7 +102,8 @@ def access_token_and_database():
 
     message = "<center>" \
               "<p>Hello, {}. Thank you for authorizing with Strava.<br/><br/>"\
-              "<a href=http://localhost:8080/visualization.png>Ready to analyze your activities?</a><br/><br/>" \
+              "<a href=http://localhost:8080/visualization.png>" \
+              "Ready to analyze your activities?</a><br/><br/>" \
               "<a><img src='static/img/api_logo_pwrdBy_strava_stack_gray.png'></a></p>" \
               "</center>".format(name)
 
@@ -109,8 +113,6 @@ def access_token_and_database():
 @app.route("/visualization.png")
 def display_visualization():
     """Display a visualization of the activities stored to the database."""
-    from io import BytesIO
-
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter
@@ -124,8 +126,8 @@ def display_visualization():
         ax.plot_date(dates, aerobic_values, "-")
         ax.xaxis.set_major_formatter(DateFormatter('%m-%d-%Y'))
         fig.autofmt_xdate()
-        plt.xlabel("Date")
-        plt.ylabel("Aerobic Vale = AvgSpeed/AvgHR")
+        ax.xlabel("Date")
+        ax.ylabel("Aerobic Value = AvgSpeed/AvgHR")
         canvas = FigureCanvas(fig)
         png_output = BytesIO()
         canvas.print_png(png_output)

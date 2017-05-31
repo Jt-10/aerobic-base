@@ -1,9 +1,9 @@
-import unittest
 import os
+import unittest
 
 import sys; print(list(sys.modules.keys()))
 
-# Configure our app to use the testing databse
+# Configure app to use the testing database
 os.environ["CONFIG_PATH"] = "tuneful.config.TestingConfig"
 
 from aerobic import app, db, Athlete, Activity
