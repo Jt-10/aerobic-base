@@ -12,7 +12,6 @@ from env.config import oauth_credentials
 ###########################
 # Tools for visualization #
 ###########################
-import matplotlib.pyplot as plt
 from flask import make_response
 from io import BytesIO
 
@@ -102,7 +101,7 @@ def access_token_and_database():
 
     message = "<center>" \
               "<p>Hello, {}. Thank you for authorizing with Strava.<br/><br/>"\
-              "<a href=http://localhost:8080/visualization.png>" \
+              "<a href=http://localhost:5000/visualization.png>" \
               "Ready to analyze your activities?</a><br/><br/>" \
               "<a><img src='static/img/api_logo_pwrdBy_strava_stack_gray.png'></a></p>" \
               "</center>".format(name)
@@ -121,13 +120,12 @@ def display_visualization():
     aerobic_values = Activity.query.with_entities(Activity.aerobic_value).all()
 
     try:
+        # Add axis labels
         fig = Figure()
         ax=fig.add_subplot(111)
         ax.plot_date(dates, aerobic_values, "-")
         ax.xaxis.set_major_formatter(DateFormatter('%m-%d-%Y'))
         fig.autofmt_xdate()
-        ax.xlabel("Date")
-        ax.ylabel("Aerobic Value = AvgSpeed/AvgHR")
         canvas = FigureCanvas(fig)
         png_output = BytesIO()
         canvas.print_png(png_output)

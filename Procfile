@@ -1,1 +1,1 @@
-web: gunicorn aerobic-base:app --log-file=-
+web: gunicorn aerobic:app --log-file=-
