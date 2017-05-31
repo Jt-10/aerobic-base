@@ -1,0 +1,13 @@
+Flask
+flask-login
+flask_sqlalchemy
+Jinja2
+MarkupSafe
+SQLAlchemy
+Werkzeug
+itsdangerous
+jsonschema
+nose
+psycopg2
+stravalib
+matplotlib
