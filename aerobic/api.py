@@ -101,7 +101,7 @@ def access_token_and_database():
 
     message = "<center>" \
               "<p>Hello, {}. Thank you for authorizing with Strava.<br/><br/>"\
-              "<a href=http://localhost:5000/visualization.png>" \
+              "<a href=http://0.0.0.0:8080/visualization.png>" \
               "Ready to analyze your activities?</a><br/><br/>" \
               "<a><img src='static/img/api_logo_pwrdBy_strava_stack_gray.png'></a></p>" \
               "</center>".format(name)

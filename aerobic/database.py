@@ -12,7 +12,7 @@ class Athlete(db.Model):
         self.activities = activities
 
     def __repr__(self):
-        return "<Name {}r".format(self.name)
+        return "<Name {}r>".format(self.name)
 
 class Activity(db.Model):
     # Strava documentation on activity data at https://strava.github.io/api/v3/activities/
